@@ -1,3 +1,4 @@
+import Link from "next/link"
 import React from "react"
 
 export default function Footer() {
@@ -6,14 +7,14 @@ export default function Footer() {
       <span className="text-sm text-gray-500 dark:text-gray-400 sm:text-center">© 2023 Łukasz Syczewski . All Rights Reserved.</span>
       <ul className="mt-1 flex select-none flex-wrap items-center text-sm text-gray-500 dark:text-gray-400 sm:mt-0">
         <li>
-          <a href="#" className=" p-2  hover:underline sm:p-4">
+          <Link href="/about" className=" p-2  hover:underline sm:p-4">
             About
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#" className="p-2 hover:underline sm:p-4">
+          <Link href="/contact" className="p-2 hover:underline sm:p-4">
             Contact
-          </a>
+          </Link>
         </li>
       </ul>
     </footer>
