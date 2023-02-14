@@ -6,7 +6,7 @@ import LoginBtn from "./LoginBtn"
 export default function Navbar() {
   const [navbar, setNavbar] = useState(false)
   return (
-    <nav className="w-full  select-none">
+    <nav className={`w-full lg:bg-none select-none ${navbar ? "fixed inset-0 bg-black" : "block"}`}>
       <div className="justify-between px-4 mx-auto lg:max-w-7xl lg:items-baseline lg:flex lg:px-8">
         <div>
           <div className="flex items-center justify-between py-3 lg:py-5 lg:block">
