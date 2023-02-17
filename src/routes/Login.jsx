@@ -1,14 +1,57 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from "react-router-dom";
-import {IoIosArrowRoundBack} from "react-icons/io"
+import React, { useEffect, useRef, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { IoIosArrowRoundBack } from "react-icons/io"
+import { FcCheckmark, FcCancel, FcInfo, FcHighPriority } from "react-icons/fc"
+
+const USERNAME_REGEX = /^[\p{L}\p{N}]{5,31}$/u //match alphhanumunicode with range<5-30>
+const PASSWORD_REGEX = /^.{8,}$/ //match anything except line break with len >= 8 (space included)
 
 export default function Login() {
+  const usernameRef = useRef()
+  const errRef = useRef()
+
   const [username, setUsername] = useState("")
+  const [validUsername, setValidUsername] = useState(false)
+  const [usernameFocus, setUsernameFocus] = useState(false)
+
   const [password, setPassword] = useState("")
-  const navigate = useNavigate();
+  const [validPassword, setValidPassword] = useState(false)
+  const [passwordFocus, setPasswordFocus] = useState(false)
+
+  const [matchPassword, setMatchPassword] = useState("")
+  const [validMatch, setValidMatch] = useState(false)
+  const [matchFocus, setMatchFocus] = useState(false)
+
+  const [errMsg, setErrMsg] = useState("")
+
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    usernameRef.current.focus()
+  }, [])
+
+  useEffect(() => {
+    setValidUsername(USERNAME_REGEX.test(username))
+  }, [username])
+
+  useEffect(() => {
+    setValidPassword(PASSWORD_REGEX.test(password))
+    setValidMatch(password === matchPassword)
+  }, [password, matchPassword])
+
+  useEffect(() => {
+    setErrMsg("")
+  }, [username, password, matchPassword])
 
   const handleSubmit = (event) => {
     event.preventDefault()
+
+    const v1 = USERNAME_REGEX.test(username)
+    const v2 = PASSWORD_REGEX.test(password)
+    if (!v1 || !v2) {
+      setErrMsg("Invalid Entry")
+      return
+    }
 
     // build the request payload
     let payload = {
@@ -29,110 +72,145 @@ export default function Login() {
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          //   setAlertClassName("alert-danger")
-          //   setAlertMessage(data.message)
-          console.log(`error: ${data.error}`)
+          console.log(data.error)
+          setErrMsg(data.error)
+          errRef.current.focus()
         } else {
-          //   setJwtToken(data.access_token)
-          //   setAlertClassName("d-none")
-          //   setAlertMessage("")
-          //   toggleRefresh(true)
+          //clear state and controlled inputs
+          //need value attrib on inputs for this
+          setUsername("")
+          setPassword("")
+          setMatchPassword("")
           console.log(data.access_token)
-          // SetAccessToken(data.access_token)
-          // console.log(document.cookie)
           navigate("/")
         }
       })
       .catch((error) => {
-        // setAlertClassName("alert-danger")
-        // setAlertMessage(error)
-        console.log(error)
+        console.log(error, "error2")
+        errRef.current.focus()
       })
   }
 
-  return(
-    // <div className="static w-full bg-red-300 text-center z-10">
-    //   <div>
-    //     <h2>Login</h2>
-    //     <hr />
-
-    //     <form onSubmit={handleSubmit}>
-    //       <input
-    //         title="Username"
-    //         type="username"
-    //         className=""
-    //         name="email"
-    //         autoComplete="username-new"
-    //         onChange={(event) => setUsername(event.target.value)}
-    //       />
-
-    //       <input
-    //         title="Password"
-    //         type="password"
-    //         className=""
-    //         name="password"
-    //         autoComplete="password-new"
-    //         onChange={(event) => setPassword(event.target.value)}
-    //       />
-
-    //       <hr />
-
-    //       <input type="submit" className="" value="Login" />
-    //     </form>
-    //   </div>
-    // </div>
-    <div className="">
-      <Link to={"/"}>
-      <IoIosArrowRoundBack className="absolute ml-5 mt-5 text-white" size={60}/>
-      </Link>
-      <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto h-screen lg:py-0 ">
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-lg xl:p-0 dark:bg-gray-800 dark:border-gray-700">
-          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Sign in to your account
-            </h1>
+  return (
+    <div className="bg-gray-900">
+      <div className="mx-auto flex h-screen flex-col items-center justify-center px-6 py-8 lg:py-0 ">
+        <Link to={"/"}>
+          <IoIosArrowRoundBack size={60} style={{ color: "rgb(59 130 246)" }} />
+        </Link>
+        <div className="w-full rounded-lg  border border-gray-700 bg-gray-800 shadow sm:max-w-lg md:mt-0 xl:p-0">
+          <div className="space-y-4 p-6 sm:p-8 md:space-y-6">
+            <p
+              ref={errRef}
+              className={errMsg ? "flex items-center text-3xl font-bold capitalize text-red-500" : "hidden"}
+              aria-live="assertive"
+            >
+              <FcHighPriority className="mr-1" />
+              {errMsg}
+            </p>
+            <h1 className="text-xl font-bold leading-tight tracking-tight text-white md:text-2xl">Sign in to your account</h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
               <div>
-                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Username
+                <label htmlFor="username" className="mb-2 flex items-end text-sm font-medium text-white">
+                  Username:
+                  <FcCheckmark size={25} className={validUsername ? "ml-1" : "hidden"} />
+                  <FcCancel size={25} className={validUsername || !username ? "hidden" : "ml-1"} />
                 </label>
                 <input
                   type="text"
-                  name="username"
                   id="username"
-                  placeholder="Enter your username"
-                  required
+                  ref={usernameRef}
+                  autoComplete="off"
                   onChange={(event) => setUsername(event.target.value)}
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  value={username}
+                  required
+                  aria-invalid={validUsername ? "false" : "true"}
+                  aria-describedby="uidnote"
+                  onFocus={() => setUsernameFocus(true)}
+                  onBlur={() => setUsernameFocus(false)}
+                  className="block w-full rounded-lg border  border-gray-600 bg-gray-700 p-2.5 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
+                <p
+                  id="uidnote"
+                  className={
+                    usernameFocus && username && !validUsername ? "mt-2 w-full rounded-xl bg-gray-900 p-2 text-sm text-gray-300" : "hidden"
+                  }
+                >
+                  <FcInfo className="mr-1 inline-block" />
+                  5 to 30 characters.
+                  <br />
+                  Alphanumeric unicode.
+                </p>
               </div>
               <div>
-                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Password
+                <label htmlFor="password" className="mb-2 flex items-end text-sm font-medium text-gray-900 dark:text-white">
+                  Password:
+                  <FcCheckmark size={25} className={validPassword ? "ml-1" : "hidden"} />
+                  <FcCancel size={25} className={validPassword || !password ? "hidden" : "ml-1"} />
                 </label>
                 <input
                   type="password"
-                  name="password"
                   id="password"
-                  placeholder="••••••••"
                   onChange={(event) => setPassword(event.target.value)}
+                  value={password}
                   required
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  aria-invalid={validPassword ? "false" : "true"}
+                  aria-describedby="pwdnote"
+                  onFocus={() => setPasswordFocus(true)}
+                  onBlur={() => setPasswordFocus(false)}
+                  className="block w-full rounded-lg border  border-gray-600 bg-gray-700 p-2.5 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
+                <p
+                  id="pwdnote"
+                  className={passwordFocus && !validPassword ? "mt-2 w-full rounded-xl bg-gray-900 p-2 text-sm text-gray-300" : "hidden"}
+                >
+                  <FcInfo className="mr-1 inline-block" />
+                  Minimum 8 characters.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="confirm_pwd" className="mb-2 flex items-end text-sm font-medium text-white">
+                  Confirm Password:
+                  <FcCheckmark size={25} className={validMatch && matchPassword ? "ml-1" : "hidden"} />
+                  <FcCancel size={25} className={validMatch || !matchPassword ? "hidden" : "ml-1"} />
+                </label>
+                <input
+                  type="password"
+                  id="confirm_pwd"
+                  onChange={(e) => setMatchPassword(e.target.value)}
+                  value={matchPassword}
+                  required
+                  aria-invalid={validMatch ? "false" : "true"}
+                  aria-describedby="confirmnote"
+                  onFocus={() => setMatchFocus(true)}
+                  onBlur={() => setMatchFocus(false)}
+                  className="block w-full rounded-lg border  border-gray-600 bg-gray-700 p-2.5 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+                <p
+                  id="confirmnote"
+                  className={matchFocus && !validMatch ? "mt-2 w-full rounded-xl bg-gray-900 p-2 text-sm text-gray-300" : "hidden"}
+                >
+                  <FcInfo className="mr-1 inline-block" />
+                  Must match the first password input field.
+                </p>
               </div>
               <div className="flex items-center justify-between">
-                <Link to={"#"} className="text-sm font-medium text-blue-600 hover:underline dark:text-blue-500">
+                <Link to={"/"} className="text-sm font-medium  text-blue-500 hover:underline">
                   Forgot password?
                 </Link>
               </div>
-              <input
+              <button
+                disabled={!validUsername || !validPassword || !validMatch}
+                // type={!validUsername || !validMatch ? "disabled" : "submit"}
                 type="submit"
-                className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 cursor-pointer"
-                value="Login"
-              />
-              <p className="text-sm font-light text-gray-500 dark:text-gray-400">
+                className={
+                  "w-full cursor-pointer rounded-lg bg-blue-600 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-800 disabled:cursor-not-allowed disabled:opacity-25   hover:disabled:bg-blue-600"
+                }
+              >
+                Login
+              </button>
+              <p className="text-sm font-light text-gray-400">
                 Don’t have an account yet?{" "}
-                <Link to={"/signup"} className="font-medium text-blue-600 hover:underline dark:text-blue-500">
+                <Link to={"/signup"} className="font-medium  text-blue-500 hover:underline">
                   Sign up
                 </Link>
               </p>
