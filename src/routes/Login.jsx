@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState, useContext } from "react"
+import AuthContext from "../context/AuthProvider"
 import { Link, useNavigate } from "react-router-dom"
 import { IoIosArrowRoundBack } from "react-icons/io"
 import { FcCheckmark, FcCancel, FcInfo, FcHighPriority } from "react-icons/fc"
@@ -7,6 +8,8 @@ const USERNAME_REGEX = /^[\p{L}\p{N}]{5,31}$/u //match alphhanumunicode with ran
 const PASSWORD_REGEX = /^.{8,}$/ //match anything except line break with len >= 8 (space included)
 
 export default function Login() {
+  const { setAuth } = useContext(AuthContext)
+
   const usernameRef = useRef()
   const errRef = useRef()
 
@@ -86,7 +89,8 @@ export default function Login() {
         }
       })
       .catch((error) => {
-        console.log(error, "error2")
+        console.log(error)
+        setErrMsg(error)
         errRef.current.focus()
       })
   }
@@ -142,7 +146,7 @@ export default function Login() {
                 </p>
               </div>
               <div>
-                <label htmlFor="password" className="mb-2 flex items-end text-sm font-medium text-gray-900 dark:text-white">
+                <label htmlFor="password" className="mb-2 flex items-end text-sm font-medium text-white">
                   Password:
                   <FcCheckmark size={25} className={validPassword ? "ml-1" : "hidden"} />
                   <FcCancel size={25} className={validPassword || !password ? "hidden" : "ml-1"} />

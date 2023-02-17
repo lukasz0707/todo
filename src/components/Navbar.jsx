@@ -26,17 +26,17 @@ export default function Navbar() {
         <div>
           <div className={`mt-8 flex-1 justify-self-center pb-3 lg:mt-0 lg:block lg:pb-0 ${navbar ? "block p-12 lg:p-0" : "hidden"}`}>
             <ul className="h-screen place-items-baseline justify-center text-2xl lg:flex lg:h-auto">
-              <Link to="/todos" onClick={() => setNavbar(!navbar)}>
+              <Link to="/todos" onClick={() => setNavbar(false)}>
                 <li className="border-b-2  border-cyan-800 py-2 pb-6 text-center text-white hover:bg-slate-900  lg:border-b-0 lg:px-6   lg:hover:bg-transparent lg:hover:text-cyan-500">
                   Todos
                 </li>
               </Link>
-              <Link to="/friends" onClick={() => setNavbar(!navbar)}>
+              <Link to="/friends" onClick={() => setNavbar(false)}>
                 <li className="border-b-2 border-cyan-800 py-2 px-6 pb-6  text-center text-white  hover:bg-slate-900 lg:border-b-0  lg:hover:bg-transparent lg:hover:text-cyan-500">
                   Friends
                 </li>
               </Link>
-              <Link to="/settings" onClick={() => setNavbar(!navbar)}>
+              <Link to="/settings" onClick={() => setNavbar(false)}>
                 <li className="border-b-2 border-cyan-800 py-2 px-6 pb-6  text-center text-white  hover:bg-slate-900  lg:border-b-0  lg:hover:bg-transparent lg:hover:text-cyan-500">
                   Settings
                 </li>

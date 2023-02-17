@@ -101,7 +101,7 @@ export default function Signup() {
       body: JSON.stringify(payload),
     }
 
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`, requestOptions)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/`, requestOptions)
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
@@ -178,7 +178,7 @@ export default function Signup() {
                 </p>
               </div>
               <div>
-                <label htmlFor="password" className="mb-2 flex items-end text-sm font-medium text-gray-900 dark:text-white">
+                <label htmlFor="password" className="mb-2 flex items-end text-sm font-medium text-white">
                   Password:
                   <FcCheckmark size={25} className={validPassword ? "ml-1" : "hidden"} />
                   <FcCancel size={25} className={validPassword || !password ? "hidden" : "ml-1"} />
@@ -204,7 +204,7 @@ export default function Signup() {
                 </p>
               </div>
               <div>
-                <label htmlFor="confirm_pwd" className="mb-2 flex items-end text-sm font-medium text-gray-900 dark:text-white">
+                <label htmlFor="confirm_pwd" className="mb-2 flex items-end text-sm font-medium text-white">
                   Confirm Password:
                   <FcCheckmark size={25} className={validMatch && matchPassword ? "ml-1" : "hidden"} />
                   <FcCancel size={25} className={validMatch || !matchPassword ? "hidden" : "ml-1"} />
