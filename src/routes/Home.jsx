@@ -1,7 +1,7 @@
 import Footer from "../components/Footer"
 import Navbar from "../components/Navbar"
 
-export default function Root() {
+export default function Home() {
   return (
     <div
       className="flex h-screen max-w-full flex-col items-center  justify-between break-words"
