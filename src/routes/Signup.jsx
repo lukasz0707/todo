@@ -3,6 +3,8 @@ import { Link, useNavigate } from "react-router-dom"
 import { IoIosArrowRoundBack } from "react-icons/io"
 import { FcCheckmark, FcCancel, FcInfo, FcHighPriority } from "react-icons/fc"
 
+import axios from "../api/axios"
+
 const USERNAME_REGEX = /^[\p{L}\p{N}]{5,31}$/u //match alphhanumunicode with range<5-30>
 const PASSWORD_REGEX = /^.{8,}$/ //match anything except line break with len >= 8 (space included)
 const NAME_REGEX = /^[\p{L}\p{N}]{5,76}$/u //match alphhanumunicode with range<5-75>
@@ -69,8 +71,66 @@ export default function Signup() {
     setErrMsg("")
   }, [username, password, matchPassword, firstName, lastName, email])
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
+  // const handleSubmit = (event) => {
+  //   event.preventDefault()
+
+  //   const v1 = USERNAME_REGEX.test(username)
+  //   const v2 = PASSWORD_REGEX.test(password)
+  //   const v3 = NAME_REGEX.test(firstName)
+  //   const v4 = NAME_REGEX.test(lastName)
+  //   const v5 = EMAIL_REGEX.test(email)
+
+  //   if (!v1 || !v2 || !v3 || !v4 || !v5) {
+  //     setErrMsg("Invalid Entry")
+  //     return
+  //   }
+
+  //   // build the request payload
+  //   let payload = {
+  //     username: username,
+  //     password: password,
+  //     first_name: firstName,
+  //     last_name: lastName,
+  //     email: email,
+  //   }
+
+  //   const requestOptions = {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     credentials: "include",
+  //     body: JSON.stringify(payload),
+  //   }
+
+  //   fetch(`${import.meta.env.VITE_BACKEND_URL}/users/`, requestOptions)
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       if (data.error) {
+  //         console.log(data.error)
+  //         setErrMsg(data.error)
+  //         errRef.current.focus()
+  //       } else {
+  //         //clear state and controlled inputs
+  //         //need value attrib on inputs for this
+  //         setUsername("")
+  //         setPassword("")
+  //         setMatchPassword("")
+  //         setFirstName("")
+  //         setLastName("")
+  //         setEmail("")
+  //         console.log(data.access_token)
+  //         navigate("/")
+  //       }
+  //     })
+  //     .catch((error) => {
+  //       console.log(error)
+  //       errRef.current.focus()
+  //     })
+  // }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
 
     const v1 = USERNAME_REGEX.test(username)
     const v2 = PASSWORD_REGEX.test(password)
@@ -92,39 +152,34 @@ export default function Signup() {
       email: email,
     }
 
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
+    try {
+      const response = await axios.post("/users", JSON.stringify(payload), {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      })
+      console.log(JSON.stringify(response?.data))
+      //console.log(JSON.stringify(response));
+      const accessToken = response?.data?.access_token
+      setAuth({ username, password, accessToken })
+      setUsername("")
+      setPassword("")
+      setMatchPassword("")
+      setFirstName("")
+      setLastName("")
+      setEmail("")
+      navigate(from, { replace: true })
+    } catch (err) {
+      if (!err?.response) {
+        setErrMsg("No Server Response")
+      } else if (err.response?.status === 400) {
+        setErrMsg("Missing Username or Password")
+      } else if (err.response?.status === 401) {
+        setErrMsg("Unauthorized")
+      } else {
+        setErrMsg("Login Failed")
+      }
+      errRef.current.focus()
     }
-
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/`, requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.log(data.error)
-          setErrMsg(data.error)
-          errRef.current.focus()
-        } else {
-          //clear state and controlled inputs
-          //need value attrib on inputs for this
-          setUsername("")
-          setPassword("")
-          setMatchPassword("")
-          setFirstName("")
-          setLastName("")
-          setEmail("")
-          console.log(data.access_token)
-          navigate("/")
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-        errRef.current.focus()
-      })
   }
 
   return (

@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom"
 import { IoIosArrowRoundBack } from "react-icons/io"
 import { FcCheckmark, FcCancel, FcInfo, FcHighPriority } from "react-icons/fc"
 
+import axios from "../api/axios"
+
 const USERNAME_REGEX = /^[\p{L}\p{N}]{5,31}$/u //match alphhanumunicode with range<5-30>
 const PASSWORD_REGEX = /^.{8,}$/ //match anything except line break with len >= 8 (space included)
 
@@ -46,8 +48,8 @@ export default function Login() {
     setErrMsg("")
   }, [username, password, matchPassword])
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault()
 
     const v1 = USERNAME_REGEX.test(username)
     const v2 = PASSWORD_REGEX.test(password)
@@ -62,37 +64,31 @@ export default function Login() {
       password: password,
     }
 
-    const requestOptions = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
+    try {
+      const response = await axios.post("/users/login", JSON.stringify(payload), {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true,
+      })
+      console.log(JSON.stringify(response?.data))
+      //console.log(JSON.stringify(response));
+      const accessToken = response?.data?.access_token
+      setAuth({ username, password, accessToken })
+      setUsername("")
+      setPassword("")
+      setMatchPassword("")
+      navigate(from, { replace: true })
+    } catch (err) {
+      if (!err?.response) {
+        setErrMsg("No Server Response")
+      } else if (err.response?.status === 400) {
+        setErrMsg("Missing Username or Password")
+      } else if (err.response?.status === 401) {
+        setErrMsg("Unauthorized")
+      } else {
+        setErrMsg("Login Failed")
+      }
+      errRef.current.focus()
     }
-
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/users/login`, requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.error) {
-          console.log(data.error)
-          setErrMsg(data.error)
-          errRef.current.focus()
-        } else {
-          //clear state and controlled inputs
-          //need value attrib on inputs for this
-          setUsername("")
-          setPassword("")
-          setMatchPassword("")
-          console.log(data.access_token)
-          navigate("/")
-        }
-      })
-      .catch((error) => {
-        console.log(error)
-        setErrMsg(error)
-        errRef.current.focus()
-      })
   }
 
   return (
